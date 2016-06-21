@@ -1,0 +1,104 @@
+---
+title: "classify-raster-data"
+author: "Michiel P. Veldhuis"
+date: "21 juni 2016"
+output: html_document
+---
+
+## Classifying raster data
+First import the necessary libraries
+
+
+```{r import-libraries}
+
+# load libraries
+library(raster)
+library(rgdal)
+
+```
+
+## Import Canopy Height Model
+
+```{r import-canopy-height}
+
+chm_teak <- raster("../NEONdata/D17-California/TEAK/2013/lidar/TEAK_lidarCHM.tif")
+plot(chm_teak)
+
+```
+
+## Deal with 0 values
+
+```{r assign-values-na}
+
+hist(chm_teak)
+chm_teak[chm_teak==0] <- NA
+hist(chm_teak,
+     xlab="Tree Height (m)")
+
+```
+
+## Import aspect data
+
+```{r import-aspect}
+
+aspect_teak <- raster("../NEONdata/D17-California/TEAK/2013/lidar/TEAK_lidarAspect.tif")
+plot(aspect_teak,
+     main="Aspect data for Teakettle Field Site")
+
+```
+
+## Create classification Matrix
+
+```{r class-matrix}
+
+class.m <- c(0, 45, 1,
+             45, 135, NA,
+             135, 225, 2,
+             225, 315, NA,
+             315, 360, 1)
+rcl.m <- matrix(class.m, 
+          ncol = 3,
+          byrow = TRUE)
+
+```
+
+## Reclassify raster
+
+```{r reclassify-raster}
+
+asp.ns <- reclassify(aspect_teak,
+                     rcl.m)
+plot(asp.ns, 
+     main="North and South Facing Slopes")
+```
+
+## Export Geotiff
+
+```{r export-tiff, eval=FALSE}
+
+writeRaster(asp.ns,
+            file = "../outputs/TEAK/Aspect_Teak.tif",
+            options = "COMPRESS=LZW",
+            NAflag = -9999)
+
+```
+
+  
+## Mask Data
+
+```{r raster-mask}
+
+asp.ns
+
+ndvi <- raster("../NEONdata/D17-California/TEAK/2013/spectrometer/veg_index/TEAK_NDVI.tif")
+plot(ndvi)
+
+# mask data
+nFacing.ndvi <- mask(ndvi, 
+                     asp.ns) 
+
+plot(nFacing.ndvi)
+
+
+```
+
