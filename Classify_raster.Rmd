@@ -2,7 +2,7 @@
 title: "classify-raster-data"
 author: "Michiel P. Veldhuis"
 date: "21 juni 2016"
-output: html_document
+output: word_document
 ---
 
 ## Classifying raster data
